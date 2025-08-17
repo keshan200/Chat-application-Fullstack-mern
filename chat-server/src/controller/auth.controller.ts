@@ -11,7 +11,7 @@ const create_access_token = (userId:string) => {
         id: userId
     },
     process.env.ACCESS_SECRET_TOKEN!,
-    {expiresIn:"2m"}
+    {expiresIn:"10s"}
 )}
 
 
@@ -84,7 +84,7 @@ export const login  = async(req:Request,res:Response,next:NextFunction) => {
        const AccessToken =  create_access_token(user._id.toString())
        const RefreshToken =  create_refresh_token(user._id.toString())
 
-       console.log(RefreshToken)
+       console.log("log in refresh token",RefreshToken)
 
        const isProd =  process.env.NODE_ENV === "production"
 
@@ -95,24 +95,6 @@ export const login  = async(req:Request,res:Response,next:NextFunction) => {
           maxAge:7 * 24 * 60 * 60 * 1000,
           path:"/api/auth/refresh-token"
        })
-
-
-
-     res.cookie("User", JSON.stringify({
-          id: user._id,
-          full_name: user.full_name,
-          email: user.email,
-          img: user.img,
-
-      }), {
-
-         httpOnly: false,  
-         secure: isProd,
-         sameSite: isProd ? "strict" : "lax",
-         maxAge: 7 * 24 * 60 * 60 * 1000,
-         path: "/"
-      });
-
 
 
        const userWithoutPass = {
@@ -140,6 +122,9 @@ export const refreshToken = async (req:Request,res:Response,next:NextFunction) =
    try{
 
      const token  =  req.cookies?.refreshToken
+     
+     console.log("refreshtoken?>>>>>>>>>>>>>>>",token)
+
      if(!token){
       throw new APIError(401,"Refresh Token missing")
      }
@@ -171,21 +156,9 @@ export const refreshToken = async (req:Request,res:Response,next:NextFunction) =
           }
 
           const newAcessToken = create_access_token(user._id.toString())
-          res.status(200).json({accessToken : newAcessToken,
+          res.status(200).json({accessToken : newAcessToken})
+       })
 
-
-        user: {
-            id: user._id,
-            full_name: user.full_name,
-            email: user.email,
-            img: user.img,
-            createdAt: user.createAt,
-          },
-          })
-
-       }
-     )
-    
    }catch(error){
          console.log(error)
           next(error)

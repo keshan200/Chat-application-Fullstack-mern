@@ -27,7 +27,7 @@ export const authenticateToken = (req:Request,res:Response,next:NextFunction) =>
        
               if(error){
                 if(error instanceof TokenExpiredError){
-                    return new APIError(401,"Access Token Expired")
+                    throw new APIError(401,"Access Token Expired")
                 }else if (error instanceof JsonWebTokenError){
                     throw new APIError(401,"Invalid Access Token")
                 }else{
@@ -38,7 +38,7 @@ export const authenticateToken = (req:Request,res:Response,next:NextFunction) =>
               if(!decoded || typeof decoded === "string"){
                 throw new APIError(401,"Error Access Token Payload Error")
               }
-               
+                
               next()
 
          } 
