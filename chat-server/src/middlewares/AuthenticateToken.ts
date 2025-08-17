@@ -5,16 +5,6 @@ import jwt, { JsonWebTokenError, JwtPayload, TokenExpiredError } from "jsonwebto
 
 
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        role?: string;
-      };
-    }
-  }
-}
 
 export const authenticateToken = (req:Request,res:Response,next:NextFunction) =>{
 
@@ -49,13 +39,6 @@ export const authenticateToken = (req:Request,res:Response,next:NextFunction) =>
                 throw new APIError(401,"Error Access Token Payload Error")
               }
                
-              req.user = {
-                  id: (decoded as JwtPayload).id,
-                  role: (decoded as JwtPayload).role,
-               };
-            console.log("User info from token:", req.user);
-               
-
               next()
 
          } 

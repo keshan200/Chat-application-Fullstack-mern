@@ -1,21 +1,28 @@
-import dotenv from "dotenv"
-import express ,{Request,Response}from "express"
-import { connectDB } from "./db/mongo"
+import express from "express";
+import * as dotenv from "dotenv";
+import {connectDB} from "./db/mongo"
 import rootRouter from "./routes"
+import { errorHandler } from "./middlewares/errorHandler"
+
 
 dotenv.config()
 const app =  express()
-
-const PORT = process.env.PORT
-
-app.use("/api",rootRouter)
 app.use(express.json())
 
 
+const PORT = process.env.PORT
+app.use("/api",rootRouter)
+app.use(errorHandler)
+app.use("/uploads", express.static("uploads"));
 
 
-connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`server running on http://localhost:${PORT}`)
-    })
+
+
+connectDB().then(()=>{
+ app.listen(PORT,async () => {
+    console.log(`server running on http://localhost:${PORT}`)
+ })
 })
+
+
+
