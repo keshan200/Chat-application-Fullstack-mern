@@ -4,10 +4,23 @@ import {connectDB} from "./db/mongo"
 import rootRouter from "./routes"
 import { errorHandler } from "./middlewares/errorHandler"
 import cookieParser from "cookie-parser"
-
+import { Server } from "socket.io";
+import { socketHandler } from "./controller/message.controller";
+import http from "http";
+import cors from "cors";
 
 dotenv.config()
 const app =  express()
+
+
+const corsOptions = {
+  origin: process.env.CLIENT_ORIGIN,
+  credentials: true,
+  methods: "GET,PUT,PATCH,DELETE,POST,HEAD",
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions))
 
 app.use(express.json())
 app.use(cookieParser())
@@ -19,11 +32,18 @@ app.use("/api",rootRouter)
 app.use(errorHandler)
 app.use("/uploads", express.static("uploads"));
 
-
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173", 
+    methods: ["GET", "POST"],
+  },
+});
+socketHandler(io);
 
 
 connectDB().then(()=>{
- app.listen(PORT,async () => {
+ server.listen(PORT,async () => {
     console.log(`server running on http://localhost:${PORT}`)
  })
 })
