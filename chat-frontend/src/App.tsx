@@ -1,78 +1,35 @@
-// src/App.tsx
-import React, { useState, useEffect } from "react";
-import { socket } from "./socket";
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 
-interface Message {
-  _id: string;
-  conversation: string;
-  sender: string;
-  receiver: string;
-  text: string;
-  type: string;
-}
-
-const App = () => {
-  const [userId, setUserId] = useState("");
-  const [receiverId, setReceiverId] = useState("");
-  const [text, setText] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  // User register කරලා socket connect කරන්න
-  useEffect(() => {
-    if (userId) {
-      socket.connect();
-      socket.emit("register_user", userId);
-    }
-  }, [userId]);
-
-  // Messages listen කරන event
-  useEffect(() => {
-    const handleReceive = (msg: Message) => setMessages(prev => [...prev, msg]);
-    const handleError = (data: any) => alert(data.message);
-
-    socket.on("receive_message", handleReceive);
-    socket.on("message_sent", handleReceive);
-    socket.on("error_message", handleError);
-
-    return () => {
-      socket.off("receive_message", handleReceive);
-      socket.off("message_sent", handleReceive);
-      socket.off("error_message", handleError);
-    };
-  }, []);
-
-  // Message යවන්න
-  const handleSend = () => {
-    if (!userId || !receiverId || !text) return;
-
-    socket.emit("send_message", {
-      
-      senderId: userId,
-      receiverId: receiverId,
-      text,
-      type: "text",
-    });
-
-    setText("");
-  };
+function App() {
+  const [count, setCount] = useState(0)
 
   return (
-    <div>
-      <h2>Chat Test</h2>
-      <input placeholder="User ID" value={userId} onChange={(e) => setUserId(e.target.value)} />
-      <input placeholder="Receiver ID" value={receiverId} onChange={(e) => setReceiverId(e.target.value)} />
-      <input placeholder="Message..." value={text} onChange={(e) => setText(e.target.value)} />
-      <button onClick={handleSend}>Send</button>
-
+    <>
       <div>
-        {messages.map((msg) => (
-          <div key={msg._id}>
-            {msg.sender} → {msg.receiver}: {msg.text}
-          </div>
-        ))}
+        <a href="https://vite.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
       </div>
-    </div>
-  );
-};
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.tsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
+  )
+}
 
-export default App;
+export default App
