@@ -1,19 +1,28 @@
+import { Outlet } from "react-router-dom";
+import SideBar from "../components/SideBar";
+import { useAuth } from "../context/useAuth";
+
 const Layout = () => {
 
+  const {isAuthenticating,isLoggedIn} =  useAuth()
 
-    return(
-        <div className="h-screen overflow-hidden">
-           <div>
-
-           </div>
-
-           <main>
-
-           </main>
-
-        </div>
-    )
-}
+  if(isAuthenticating){
+    return <div>loading......</div>
+  }
 
 
-export default Layout
+  return (
+    <div className="h-screen flex overflow-hidden">
+
+      <div className="flex-shrink-0">
+        <SideBar />
+      </div>
+
+      <main className="h-full overflow-y-auto flex-1">
+        <Outlet />
+      </main>
+    </div>
+  );
+};
+
+export default Layout;
