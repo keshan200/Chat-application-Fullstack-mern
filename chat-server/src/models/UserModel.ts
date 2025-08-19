@@ -10,6 +10,7 @@ type User = {
     createAt: Date; 
     updateAt: Date;
     status:"active" | "inactivate"
+
 }
 
 
@@ -51,6 +52,8 @@ const userSchema = new mongoose.Schema<User>(
       minlength: [6, "Password must be at least 6 characters"], 
       maxlength: [128, "Password cannot exceed 128 characters"] 
     },
+
+    
   },
   {
     timestamps: true,
