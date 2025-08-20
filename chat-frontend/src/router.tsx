@@ -1,9 +1,11 @@
 
 import { createBrowserRouter } from "react-router-dom";
 import LoginPage from "./pages/loginPage";
-import Test from "./pages/test";
+
 import Layout from "./pages/Layout";
 import PublicLayout from "./pages/PublicLayout";
+import ChatManage from "./pages/ChatManage";
+
 
 
 
@@ -22,7 +24,8 @@ const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-      { path: "/test", element: <Test /> },
+      { path: "/chat", element: <ChatManage/> },
+      
     ],
   },
 ]);

@@ -19,7 +19,7 @@ const SideBar = () => {
 
   const handleNavigation = (path:string) => {
     setActiveItem(path);
-    // In your actual app, you would call navigate(path) here
+   
     console.log(`Navigating to: ${path}`);
   };
 

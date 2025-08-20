@@ -1,10 +1,11 @@
 import { MessageCircle, Users, Zap, Shield } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useAuth } from '../context/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../service/authService';
 import { toast } from 'react-toastify';
 import axios, { isAxiosError } from 'axios';
+import Cookies from 'js-cookie';
 
 
 
@@ -67,11 +68,13 @@ export default function LoginPage() {
 
         try{
             const user =  await login(formData)
+           
             toast.success(`Welcome , ${user.full_name}`)
             setIsLoading(true)
             autheunticate(user.AccessToken)
             setIsLoading(true)
-            navigate('/test')
+            
+            navigate('/chat')
         }catch(error:any){
             
             if(axios.isAxiosError(error)){

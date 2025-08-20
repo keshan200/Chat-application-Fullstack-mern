@@ -33,6 +33,7 @@ export interface LogoutResponse{
 export const login = async (loginData: { email: string; password: string }): Promise<LoginResponse> => {
     const response = await apiClient.post(`${AUTH_URL}/login`,loginData)
     console.log("Backend Response: ", response.data)
+    
     return response.data
 }
 

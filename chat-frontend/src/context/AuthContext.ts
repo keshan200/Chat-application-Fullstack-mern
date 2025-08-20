@@ -10,6 +10,7 @@ export interface AuthContextType {
     login:(accessToken:string) => void
     logout:() => void
     isAuthenticating:boolean
+    loading? :boolean
     
     user: User | null;
     setUser: (user: User | null) => void;
