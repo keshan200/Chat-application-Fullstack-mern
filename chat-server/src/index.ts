@@ -5,9 +5,10 @@ import rootRouter from "./routes"
 import { errorHandler } from "./middlewares/errorHandler"
 import cookieParser from "cookie-parser"
 import { Server } from "socket.io";
-import { socketHandler } from "./controller/message.controller";
+
 import http from "http";
 import cors from "cors";
+import { socketHandler } from "./sockets/SocketHandler";
 
 dotenv.config()
 
@@ -29,18 +30,25 @@ app.use(cookieParser())
 
 const PORT = process.env.PORT
 app.use("/api",rootRouter)
-
 app.use(errorHandler)
 app.use("/uploads", express.static("uploads"));
+
+
+
+
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", 
+    origin: process.env.CLIENT_ORIGIN, 
     methods: ["GET", "POST"],
+    
   },
 });
 socketHandler(io);
+
+
+
 
 
 connectDB().then(()=>{

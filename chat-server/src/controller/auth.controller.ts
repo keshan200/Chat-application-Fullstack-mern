@@ -96,7 +96,17 @@ export const login  = async(req:Request,res:Response,next:NextFunction) => {
           path:"/api/auth/refresh-token"
        })
 
+       
+res.cookie("currentID", JSON.stringify({ id: user._id }), {
+  httpOnly: false,   // frontend accessable කරන්න false
+  secure: isProd,
+  sameSite: isProd ? "strict" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: "/"
+});
 
+
+ 
        const userWithoutPass = {
            id:user.id,
            full_name:user.full_name,

@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 
 type User = {
+   
     img?:string
     full_name :string
     bio?:string 

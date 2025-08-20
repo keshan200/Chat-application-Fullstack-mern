@@ -13,6 +13,7 @@ type FriendReq = {
 
  const friendReqSchema =  new mongoose.Schema <FriendReq>({
      requester: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
+     recipient: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
      status: {
          type: String,
          enum: ["pending", "accepted", "declined"],

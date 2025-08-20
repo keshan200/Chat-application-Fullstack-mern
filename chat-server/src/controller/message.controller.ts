@@ -1,19 +1,19 @@
 import { Socket ,Server} from "socket.io";
 import { MessageModel } from "../models/MessageModel";
 import { userModel } from "../models/UserModel";
+import { getSendChatList } from "./acceptInvite.controller";
 
 
-const onlineUsers: { [userId: string]: string } = {};
+export const onlineUsers: { [userId: string]: string } = {};
 
 
-const registerUser = (socket: Socket) => (userId: string) => {
+export const registerUser = (socket: Socket) => (userId: string) => {
   onlineUsers[userId] = socket.id;
   console.log("Online Users:", onlineUsers);
 };
 
 
 export const sendMessage = (io:Server ,  socket :Socket) => async (data:any) => {
-
 
 try{
 
@@ -49,21 +49,3 @@ try{
 
 
 
-export const socketHandler = (io: Server) => {
-  io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-
-    socket.on("register_user", registerUser(socket));
-    socket.on("send_message", sendMessage(io, socket));
-
-    socket.on("disconnect", () => {
-      for (const userId in onlineUsers) {
-        if (onlineUsers[userId] === socket.id) {
-          delete onlineUsers[userId];
-          break;
-        }
-      }
-      console.log("User disconnected:", socket.id);
-    });
-  });
-};
