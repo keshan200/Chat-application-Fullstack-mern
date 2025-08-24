@@ -20,11 +20,8 @@ type Message = {
 
 
 const messageSchema = new mongoose.Schema<Message>({
-  conversation: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "Conversation", 
-    
-  },
+  conversation: { type: mongoose.Schema.Types.ObjectId, ref: "Conversation" },
+  
   sender: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User", 

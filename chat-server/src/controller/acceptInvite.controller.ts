@@ -58,7 +58,7 @@ export const getSendChatList = async (socket: any, userId: string) => {
 
 export const getAcceptedChats = async (socket: any, userId: string) => {
   try {
-    // accepted friend requests for current user
+    
     const acceptedFriendReqs = await FriendReq.find({
       status: "accepted",
       $or: [{ requester: userId }, { recipient: userId }],
@@ -67,7 +67,7 @@ export const getAcceptedChats = async (socket: any, userId: string) => {
     const conversations: any[] = [];
 
     for (let req of acceptedFriendReqs) {
-      // find or create conversation
+     
       let convo = await ConversationModel.findOne({
         participants: { $all: [req.requester, req.recipient] },
       })
@@ -81,7 +81,7 @@ export const getAcceptedChats = async (socket: any, userId: string) => {
         convo = convo.toObject();
       }
 
-      // get last message
+      //get last ms
       const lastMsg = await MessageModel.findOne({ conversation: convo._id })
         .sort({ createdAt: -1 })
         .lean() as any;

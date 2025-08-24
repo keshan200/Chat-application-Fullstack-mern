@@ -2,7 +2,8 @@ import { Socket ,Server} from "socket.io";
 import { MessageModel } from "../models/MessageModel";
 import { userModel } from "../models/UserModel";
 import { getSendChatList } from "./acceptInvite.controller";
-
+import { Request, Response } from "express"
+import mongoose from "mongoose";
 
 export const onlineUsers: { [userId: string]: string } = {};
 
@@ -49,3 +50,23 @@ try{
 
 
 
+
+
+export const getMessagesByConversation = async (req: Request, res: Response) => {
+  try {
+    const { conversationId } = req.params;
+
+    
+    const convId = new mongoose.Types.ObjectId(conversationId);
+
+    const messages = await MessageModel.find({ conversation: convId })
+      .sort({ createdAt: 1 })
+      .populate("sender", "_id full_name")
+      .populate("receiver", "_id full_name");
+
+    res.json(messages);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to load messages" });
+  }
+};
