@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
 import socket from "../socket";
-import { Search } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import type { Acceptchats } from "../types/AcceptChats";
+import type { Conversation } from "../types/Conversation";
 
 interface ChatListProps {
   userId: string;
-  onSelectChat: (chatId: string,  id:string ,full_name: string ) => void;
+  onSelectChat: (chatId: string,  id:string ,full_name: string) => void;
+  isOnline: boolean;
+
 }
 
-const ChatList = ({ userId ,onSelectChat }: ChatListProps) => {
+const ChatList = ({ userId ,onSelectChat,isOnline }: ChatListProps) => {
   const [selectedChat, setSelectedChat] = useState(0);
   const [AcceptChats, setAcceptChats] = useState<Acceptchats[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
+
+  
 
   useEffect(() => {
     socket.connect();
@@ -19,6 +26,10 @@ const ChatList = ({ userId ,onSelectChat }: ChatListProps) => {
     socket.on("chat_list", (data: Acceptchats[]) => {
       setAcceptChats(data);
       console.log("Accepted chats received:", data);
+    });
+
+    socket.on("online_users", (users: string[]) => {
+      setOnlineUsers(users);
     });
 
     return () => {
@@ -30,8 +41,20 @@ const ChatList = ({ userId ,onSelectChat }: ChatListProps) => {
   return (
     <div className="w-85 bg-white border-r border-gray-200 flex flex-col">
       {/* Header */}
-      <div className="p-6 friendborder-b border-gray-100">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Messages</h1>
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+          
+          {/* Send Invite Button */}
+          <button
+           
+            className="p-2 rounded-full text-black font-bold hover:text-blue-600 hover:bg-blue-50 transition-all"
+            title="Send Invite"
+          >
+            <UserPlus className="w-5 h-5" />
+          </button>
+        </div>
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -47,6 +70,7 @@ const ChatList = ({ userId ,onSelectChat }: ChatListProps) => {
         {AcceptChats.map((chat, index) => {
           // find friend user (skip logged-in user)
           const friend = chat.participants.find((p) => p._id !== userId);
+          const isOnline = friend ? onlineUsers.includes(friend._id) : false;
 
           return (
             <div
@@ -66,7 +90,12 @@ const ChatList = ({ userId ,onSelectChat }: ChatListProps) => {
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
                     {friend?.full_name.charAt(0)}
                   </div>
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  {/* ✅ Dynamic online indicator */}
+                  <div
+                    className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${
+                      isOnline ? "bg-green-500" : "bg-gray-400"
+                    }`}
+                  ></div>
                 </div>
 
                 <div className="flex-1 min-w-0">

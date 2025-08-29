@@ -8,7 +8,7 @@ export interface Acceptchats {
   createdAt: string;               
   updatedAt?: string;   
   
-   participants: User[];   
+  participants: User[];   
   lastMessage?: string; 
   time?: string;        
 }

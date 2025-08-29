@@ -6,7 +6,7 @@ const SideBar = () => {
 
   const menuItems = [
     { name: "Chat", path: "/chat", icon: MessageCircle },
-    { name: "Users", path: "/users", icon: Users },
+    { name: "Friends", path: "/freinds", icon: Users },
     { name: "Favorites", path: "/favorites", icon: Star },
     { name: "Archive", path: "/archive", icon: Archive },
   ];

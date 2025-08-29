@@ -6,6 +6,10 @@ import ChatList from "../components/ChatList";
 import socket from "../socket";
 import type { Messages } from "../types/Messages";
 import Cookies from "js-cookie";
+import { getAllMessageByConversation } from "../service/messageService";
+import type { Conversation } from "../types/Conversation";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const ChatManage: React.FC = () => {
   const currentUser = Cookies.get("currentID"); 
@@ -18,26 +22,68 @@ const ChatManage: React.FC = () => {
 
   const [text, setText] = useState("");
   const [msg, setMsg] = useState<Messages[]>([]);
+  const [conversations ,setConversations] =  useState<Conversation[]>([])
 
-  useEffect(() => {
-    if (!userId) return;
+   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  
 
-    socket.connect();
-    socket.emit("register_user", userId);
 
-    socket.on("receive_message", (message: Messages) => {
+  
+
+useEffect(() => {
+  if (!userId) return;
+
+  if (!socket.connected) socket.connect();
+  socket.emit("register_user", userId);
+  const handleReceive = (message: Messages) => {
+    if ((message.sender?._id || message.sender) !== userId) {
       setMsg((prev) => [...prev, message]);
+    }
+  };
+
+  const handleSent = (message: Messages) => {
+    setMsg((prev) => [...prev, message]);
+    setText("");
+  };
+
+    socket.on("online_users", (users: string[]) => {
+        setOnlineUsers(users);
     });
 
-    socket.on("message_sent", (message: Messages) => {
-      setMsg((prev) => [...prev, message]);
-      setText("");
-    });
+  socket.on("receive_message", handleReceive);
+  socket.on("message_sent", handleSent);
 
-    return () => {
-      socket.disconnect();
-    };
-  }, [userId]);
+  return () => {
+    socket.off("receive_message", handleReceive);
+    socket.off("message_sent", handleSent);
+  
+  };
+}, [userId]);
+
+
+
+
+const fetchMessages = async (conversationId: string) => {
+  try {
+  
+    const messages = await getAllMessageByConversation(conversationId);
+    setMsg(messages); 
+    console.log("Messages:", messages);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      toast.error(error.message);
+    } else {
+      toast.error("Something went wrong");
+    }
+  }
+};
+
+
+useEffect(() => {
+  if (selectedChat) fetchMessages(selectedChat);
+}, [selectedChat]);
+
+
 
   const sendMessage = () => {
     if (!text.trim() || !selectedChat || !userId || !receiverId) return;
@@ -45,7 +91,7 @@ const ChatManage: React.FC = () => {
     socket.emit("send_message", {
       conversationId: selectedChat,
       senderId: userId,
-      receiverId: receiverId,   // ✅ now correct
+      receiverId: receiverId,   
       text,
       type: "text",
     });
@@ -53,18 +99,24 @@ const ChatManage: React.FC = () => {
 
   if (!userId) return <p>Loading user...</p>;
 
+   
+
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* ✅ Pass onSelectChat callback */}
+     
       <ChatList
         userId={userId}
         onSelectChat={(chatId, id, full_name) => {
           setSelectedChat(chatId);
           setReceiverId(id);
           setReceiverName(full_name);
-          setMsg([]); // clear old messages if switching
+          setMsg([]); 
+          
         }}
+       isOnline
       />
+
+      
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col bg-white">
@@ -76,11 +128,24 @@ const ChatManage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
                   {receiverName?.charAt(0)}
                 </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+
+                 {receiverId && onlineUsers.includes(receiverId) ? (
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+          ) : (
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-gray-500 border-2 border-white rounded-full"></span>
+          )}
+
+               
               </div>
+
+              
               <div>
                 <h3 className="font-semibold text-gray-900">{receiverName}</h3>
-                <p className="text-sm text-green-500">Online</p>
+                 {receiverId && onlineUsers.includes(receiverId) ? (
+            <span className="text-green-500">Online</span>
+          ) : (
+            <span className="text-gray-400">Offline</span>
+          )}
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -104,30 +169,33 @@ const ChatManage: React.FC = () => {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {msg.map((m) => (
-            <div
-              key={m._id}
-              className={`flex ${m.sender._id === uID ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
-                  m.sender._id === uID
-                    ? "bg-blue-600 text-white rounded-br-md"
-                    : "bg-gray-100 text-gray-900 rounded-bl-md"
-                }`}
-              >
-                <p className="text-sm">{m.text}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    m.sender._id === uID ? "text-blue-200" : "text-gray-500"
-                  }`}
-                >
-                  {new Date(m.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </div>
+           <div
+             key={m._id}
+             className={`flex ${
+             (m.sender?._id || m.sender) === uID ? "justify-end" : "justify-start"
+             }`}
+             >
+  <div
+    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+      (m.sender?._id || m.sender) === uID
+        ? "bg-blue-600 text-white rounded-br-md"
+        : "bg-gray-100 text-gray-900 rounded-bl-md"
+    }`}
+  >
+    <p className="text-sm">{m.text}</p>
+    <p
+      className={`text-xs mt-1 ${
+        (m.sender?._id || m.sender) === uID ? "text-blue-200" : "text-gray-500"
+      }`}
+    >
+      {new Date(m.createdAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}
+    </p>
+  </div>
+</div>
+
           ))}
         </div>
 
